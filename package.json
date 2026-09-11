@@ -1,18 +1,18 @@
 {
-  "name": "com.katas.unimod",
+  "name": "com.spebby.unimod",
   "version": "0.1.0",
-  "unity": "2021.3",
+  "unity": "6000.2",
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.0.2",
-    "com.unity.addressables": "1.19.19",
-    "com.cysharp.unitask": "2.3.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.2",
+    "com.unity.addressables": "2.7.6",
+    "com.cysharp.unitask": "2.5.11"
   },
   "displayName": "UniMod",
   "description": "Adds modding support to your Unity project.",
   "license": "MIT",
   "author": {
-    "name": "Pablo Gutierrez Millares",
-    "email": "pagumi.dev@gmail.com"
+    "name": "Thom Mott",
+    "email": "thommott@proton.me"
   },
   "keywords": [
     "unimod",
