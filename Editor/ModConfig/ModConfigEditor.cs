@@ -6,23 +6,20 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace Katas.UniMod.Editor
-{
+
+namespace UniMod.Editor {
     [CustomEditor(typeof(ModConfig))]
-    public sealed class ModConfigEditor : UnityEditor.Editor
-    {
-        private static readonly List<string> AssemblyNames = new();
-        private static readonly List<string> ManagedPluginPaths = new();
-        private static readonly StringBuilder MessageBuilder = new();
+    public sealed class ModConfigEditor : UnityEditor.Editor {
+        static readonly List<string> AssemblyNames = new();
+        static readonly List<string> ManagedPluginPaths = new();
+        static readonly StringBuilder MessageBuilder = new();
         
-        private string _includesMessage;
+        string _includesMessage;
         
-        public override void OnInspectorGUI()
-        {
+        public override void OnInspectorGUI() {
             base.OnInspectorGUI();
             
-            if (target is not ModConfig config)
-                return;
+            if (target is not ModConfig config) return;
 
             // this prevents inspector lagging if there is a lot of included assemblies (since it would fetch them on each inspector frame update)
             config.IncludesModified -= UpdateIncludesMessage;
@@ -33,8 +30,7 @@ namespace Katas.UniMod.Editor
                 UpdateIncludesMessage();
             
             // if there is no builder, don't display the build buttons
-            if (!config.builder)
-                return;
+            if (!config.builder) return;
             
             GUILayout.Space(8);
             if (GUILayout.Button("Build"))
@@ -44,8 +40,7 @@ namespace Katas.UniMod.Editor
             // display rebuild cached info and rebuild button (if there is any cached info)
             CodeOptimization? cachedBuildMode = config.GetCachedBuildMode();
             string cachedOutputPath = config.GetCachedBuildOutputPath();
-            if (cachedBuildMode is not null && !string.IsNullOrEmpty(cachedOutputPath))
-            {
+            if (cachedBuildMode is not null && !string.IsNullOrEmpty(cachedOutputPath)) {
                 GUILayout.Space(16);
                 if (GUILayout.Button("Rebuild"))
                     config.BuildWithGuiAsync(defaultToCachedParameters: true).Forget();
@@ -81,10 +76,8 @@ namespace Katas.UniMod.Editor
                 MessageType.Info, true);
         }
 
-        private void UpdateIncludesMessage()
-        {
-            if (target is not ModConfig config)
-                return;
+        void UpdateIncludesMessage() {
+            if (target is not ModConfig config) return;
             
             // get the assembly names included for the current target platform/configuration and display them in a help box
             AssemblyNames.Clear();
@@ -98,8 +91,7 @@ namespace Katas.UniMod.Editor
             for (int i = 0; i < AssemblyNames.Count; ++i)
                 AssemblyNames[i] = $"Scripting:\t{AssemblyNames[i]}";
             
-            foreach (string path in ManagedPluginPaths)
-            {
+            foreach (string path in ManagedPluginPaths) {
                 string assemblyName = Path.GetFileNameWithoutExtension(path);
                 
                 if (!string.IsNullOrEmpty(assemblyName))
@@ -110,12 +102,9 @@ namespace Katas.UniMod.Editor
             AssemblyNames.Sort();
             MessageBuilder.Clear();
 
-            if (AssemblyNames.Count == 0)
-            {
+            if (AssemblyNames.Count == 0) {
                 MessageBuilder.Append("The current config doesn't include any managed assemblies");
-            }
-            else
-            {
+            } else {
                 MessageBuilder.Append("\nThe following managed assemblies will be included with the mod build:\n\n");
                 
                 foreach (string assemblyName in AssemblyNames)

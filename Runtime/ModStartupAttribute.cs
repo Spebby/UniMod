@@ -1,7 +1,6 @@
 using System;
 
-namespace Katas.UniMod
-{
+namespace UniMod {
     /// <summary>
     /// Use this attribute to define mod startup methods from your scripts. Methods marked with this attribute
     /// must be static and will be executed when the mod is loaded, after the startup scriptable object has
@@ -17,6 +16,5 @@ namespace Katas.UniMod
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class ModStartupAttribute : Attribute
-    { }
+    public sealed class ModStartupAttribute : Attribute { }
 }

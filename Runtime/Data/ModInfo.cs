@@ -2,14 +2,13 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.Data {
     /// <summary>
     /// Structure for the mod's info.json file.
     /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy), ItemNullValueHandling = NullValueHandling.Ignore)]
-    public struct ModInfo
-    {
+    public struct ModInfo {
         [JsonRequired]
         public string Id;
         [JsonRequired]

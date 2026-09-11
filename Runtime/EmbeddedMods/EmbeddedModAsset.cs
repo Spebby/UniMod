@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.EmbeddedMods {
     [Serializable]
-    public struct EmbeddedModAsset
-    {
+    public struct EmbeddedModAsset {
         public string guid;
         public List<string> labels;
     }

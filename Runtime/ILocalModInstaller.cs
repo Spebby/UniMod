@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod {
     /// <summary>
     /// Provides different methods to install mods locally.
     /// </summary>
-    public interface ILocalModInstaller
-    {
+    public interface ILocalModInstaller {
         /// <summary>
         /// The folder were all the mods are installed to.
         /// </summary>

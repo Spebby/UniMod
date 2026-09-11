@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
+using UniMod.Data;
 using UnityEngine;
 using UnityEngine.AddressableAssets.ResourceLocators;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod {
     /// <summary>
     /// Represents a mod. It contains all the mod information including its dependencies and any issues that
     /// can prevent the mod from loading. Loading a mod instance directly will try to force load the mod by
     /// skipping any checks for issues or missing/unsupported dependencies, so it is recommended to load mods
     /// from the context instead.
     /// </summary>
-    public interface IMod
-    {
+    public interface IMod {
         string Id { get; }
         string Version { get; }
         string DisplayName { get; }

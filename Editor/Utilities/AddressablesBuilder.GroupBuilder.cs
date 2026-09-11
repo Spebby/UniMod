@@ -6,12 +6,10 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using Object = UnityEngine.Object;
 
-namespace Katas.UniMod.Editor
-{
-    public sealed partial class AddressablesBuilder
-    {
-        public interface IGroupBuilder
-        {
+
+namespace UniMod.Editor {
+    public sealed partial class AddressablesBuilder {
+        public interface IGroupBuilder {
             public void CreateEntry(Object asset, string address = null, IEnumerable<string> labels = null);
             public void CreateEntry(string guid, string address = null, IEnumerable<string> labels = null);
         }
@@ -21,21 +19,19 @@ namespace Katas.UniMod.Editor
         /// If created from an already existing group a new group will be created, acting as a copy, and all asset entries will be temporary moved
         /// to the new group until the instance is disposed.
         /// </summary>
-        private sealed class GroupBuilder : IGroupBuilder
-        {
+        sealed class GroupBuilder : IGroupBuilder {
             public BundledAssetGroupSchema BundledSchema => _bundledSchema;
             
-            private readonly AddressableAssetSettings _settings;
-            private readonly AddressableAssetGroup _group;
-            private readonly AddressableAssetGroup _originalGroup;
-            private readonly BundledAssetGroupSchema _bundledSchema;
-            private readonly AddressableAssetEntry[] _originalEntries;
-            private readonly bool[] _originalEntriesReadOnly;
+            readonly AddressableAssetSettings _settings;
+            readonly AddressableAssetGroup _group;
+            readonly AddressableAssetGroup _originalGroup;
+            readonly BundledAssetGroupSchema _bundledSchema;
+            readonly AddressableAssetEntry[] _originalEntries;
+            readonly bool[] _originalEntriesReadOnly;
 
-            private bool _isDisposed = true;
+            bool _isDisposed = true;
 
-            public GroupBuilder(AddressableAssetSettings settings, string groupName)
-            {
+            public GroupBuilder(AddressableAssetSettings settings, string groupName) {
                 // try to get schemas from the default template, if not, try to get them from the default group
                 var defaultTemplate = settings.GroupTemplateObjects?.FirstOrDefault() as AddressableAssetGroupTemplate;
                 List<AddressableAssetGroupSchema> schemas = defaultTemplate ?
@@ -53,8 +49,7 @@ namespace Katas.UniMod.Editor
                 AddressableAssetSettings settings,
                 string groupName,
                 List<AddressableAssetGroupSchema> schemasToCopy,
-                params Type[] types)
-            {
+                params Type[] types) {
                 _settings = settings;
                 _group = settings.CreateGroup(groupName, false, true, false, schemasToCopy, types);
                 _bundledSchema = _group.GetSchema<BundledAssetGroupSchema>() ?? throw new Exception($"The group must have a {nameof(BundledAssetGroupSchema)}");
@@ -62,8 +57,7 @@ namespace Katas.UniMod.Editor
                 _isDisposed = false;
             }
 
-            public GroupBuilder(AddressableAssetSettings settings, AddressableAssetGroup group)
-            {
+            public GroupBuilder(AddressableAssetSettings settings, AddressableAssetGroup group) {
                 _settings = settings;
                 _group = settings.CreateGroup(group.Name, false, true, false, group.Schemas);
                 _originalGroup = group;
@@ -81,8 +75,7 @@ namespace Katas.UniMod.Editor
                 
                 // temporarily move all entries to the group copy and save their readonly state for later restore
                 _originalEntriesReadOnly = new bool[_originalEntries.Length];
-                for (int i = 0; i < _originalEntries.Length; ++i)
-                {
+                for (int i = 0; i < _originalEntries.Length; ++i) {
                     AddressableAssetEntry entry = _originalEntries[i];
                     _originalEntriesReadOnly[i] = entry.ReadOnly;
                     _settings.MoveEntry(entry, _group, true, false);
@@ -91,14 +84,12 @@ namespace Katas.UniMod.Editor
                 _isDisposed = false;
             }
             
-            public void CreateEntry(Object asset, string address = null, IEnumerable<string> labels = null)
-            {
+            public void CreateEntry(Object asset, string address = null, IEnumerable<string> labels = null) {
                 string guid = GetAssetGuid(asset);
                 CreateEntry(guid, address, labels);
             }
 
-            public void CreateEntry(string guid, string address = null, IEnumerable<string> labels = null)
-            {
+            public void CreateEntry(string guid, string address = null, IEnumerable<string> labels = null) {
                 ThrowIfDisposed();
                 AddressableAssetEntry entry = _settings.CreateOrMoveEntry(guid, _group, true, false);
                 
@@ -109,8 +100,7 @@ namespace Katas.UniMod.Editor
                         entry.SetLabel(label, true, true, false);
             }
             
-            public void Dispose()
-            {
+            public void Dispose() {
                 if (_isDisposed || !_originalGroup || _originalEntries is null)
                     return;
                 
@@ -121,14 +111,12 @@ namespace Katas.UniMod.Editor
                 _isDisposed = true;
             }
 
-            private void ThrowIfDisposed()
-            {
+            void ThrowIfDisposed() {
                 if (_isDisposed)
                     throw new Exception("The group builder has been disposed and you are trying to access it");
             }
             
-            private string GetAssetGuid(Object asset)
-            {
+            string GetAssetGuid(Object asset) {
                 ThrowIfDisposed();
 
                 if (!asset)

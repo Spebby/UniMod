@@ -1,13 +1,12 @@
 using System;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.Data {
     /// <summary>
     /// Issues that can prevent a mod from loading correctly.
     /// </summary>
     [Flags]
-    public enum ModIssues
-    {
+    public enum ModIssues {
         /// <summary>
         /// Mod has unknown issues. This field can be used by custom implementations.
         /// </summary>

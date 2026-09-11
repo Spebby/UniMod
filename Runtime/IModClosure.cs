@@ -1,16 +1,14 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod {
     /// <summary>
     /// A mod closure is a closed group of mods that can have dependencies with each other. A mod closure is also responsible
     /// of loading a mod with its dependencies in the correct order.
     /// </summary>
-    public interface IModClosure
-    {
-        IReadOnlyCollection<IMod> Mods { get; }
-        
+    public interface IModClosure {
+        IReadOnlyCollection<IMod> Mods { get; }        
         IMod GetMod(string id);
         
         UniTask<bool> TryLoadAllModsAsync();

@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.EmbeddedMods {
     [Serializable]
-    public struct EmbeddedModAssemblies
-    {
+    public struct EmbeddedModAssemblies {
         public RuntimePlatform platform;
         public List<string> names;
     }

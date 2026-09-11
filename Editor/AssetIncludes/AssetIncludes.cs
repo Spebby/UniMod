@@ -4,15 +4,13 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Katas.UniMod.Editor
-{
+
+namespace UniMod.Editor {
     /// <summary>
     /// Allows you to configure includes/excludes for any type of asset. You can resolve the includes using the AssetIncludesUtility class.
     /// </summary>
     [Serializable]
-    public struct AssetIncludes<T>
-        where T : Object
-    {
+    public struct AssetIncludes<T> where T : Object {
         public bool includeAssetsFolder;
         [Space(5)]
         public List<DefaultAsset> folderIncludes;
@@ -21,8 +19,7 @@ namespace Katas.UniMod.Editor
         public List<T> assetIncludes;
         public List<T> assetExcludes;
 
-        private void OnValidate()
-        {
+        void OnValidate() {
             Debug.Log("test");
         }
         
@@ -31,19 +28,18 @@ namespace Katas.UniMod.Editor
         /// <summary>
         /// Whether this instance changed after the last Validate call.
         /// </summary>
-        public bool Changed { get; private set; }
+        public bool Changed { get; set; }
         
-        private AssetListValidator<DefaultAsset> _folderIncludesValidator;
-        private AssetListValidator<DefaultAsset> _folderExcludesValidator;
-        private AssetListValidator<T> _assetIncludesValidator;
-        private AssetListValidator<T> _assetExcludesValidator;
-        private bool _lastIncludeAssetsFolderValue;
+        AssetListValidator<DefaultAsset> _folderIncludesValidator;
+        AssetListValidator<DefaultAsset> _folderExcludesValidator;
+        AssetListValidator<T> _assetIncludesValidator;
+        AssetListValidator<T> _assetExcludesValidator;
+        bool _lastIncludeAssetsFolderValue;
         
         /// <summary>
         /// Should be called in the OnValidate Unity method.
         /// </summary>
-        public void Validate(Func<T, bool> assetValidator = null)
-        {
+        public void Validate(Func<T, bool> assetValidator = null) {
             // make sure that the lists are initialized
             folderIncludes ??= new List<DefaultAsset>();
             folderExcludes ??= new List<DefaultAsset>();
@@ -73,15 +69,13 @@ namespace Katas.UniMod.Editor
             _lastIncludeAssetsFolderValue = includeAssetsFolder;
         }
 
-        private static bool IsFolder(DefaultAsset asset)
-        {
+        static bool IsFolder(DefaultAsset asset) {
             int guid = asset.GetInstanceID();
             string path = AssetDatabase.GetAssetPath(guid);
             return AssetDatabase.IsValidFolder(path);
         }
         
-        private static bool IsValidAsset(T asset)
-            => true;
+        static bool IsValidAsset(T asset) => true;
 #endregion
     }
 }

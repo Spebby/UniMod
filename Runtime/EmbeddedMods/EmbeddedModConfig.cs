@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
+using UniMod.Data;
 using UnityEngine;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.EmbeddedMods {
     [CreateAssetMenu(fileName = "EmbeddedModConfig", menuName = "UniMod/Embedded Mod Config")]
-    public sealed class EmbeddedModConfig : ScriptableObject
-    {
+    public sealed class EmbeddedModConfig : ScriptableObject {
         [Header("Configuration")]
         public string modId;
         public string modVersion;

@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
+using UniMod.Utilities.Pooling;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
-namespace Katas.UniMod.Editor
-{
+
+namespace UniMod.Editor{
     /// <summary>
     /// Utility methods to resolve AssetIncludes configurations.
     /// </summary>
-    public static class AssetIncludesUtility
-    {
+    public static class AssetIncludesUtility {
         /// <summary>
         /// Resolves and returns the included asset GUIDs from the asset includes.
         /// </summary>
-        public static HashSet<string> ResolveIncludedGuids<T>(this AssetIncludes<T> assetIncludes)
-            where T : Object
-        {
+        public static HashSet<string> ResolveIncludedGuids<T>(this AssetIncludes<T> assetIncludes) where T : Object {
             var guids = new HashSet<string>();
             ResolveIncludedGuids(assetIncludes.includeAssetsFolder,
                 assetIncludes.folderIncludes, assetIncludes.folderExcludes,
@@ -28,9 +26,7 @@ namespace Katas.UniMod.Editor
         /// <summary>
         /// Resolves the included asset GUIDs from the asset includes and populates the results into the given guids set.
         /// </summary>
-        public static void ResolveIncludedGuids<T>(this AssetIncludes<T> assetIncludes, ISet<string> guids)
-            where T : Object
-        {
+        public static void ResolveIncludedGuids<T>(this AssetIncludes<T> assetIncludes, ISet<string> guids) where T : Object {
             ResolveIncludedGuids(assetIncludes.includeAssetsFolder,
                 assetIncludes.folderIncludes, assetIncludes.folderExcludes,
                 assetIncludes.assetIncludes, assetIncludes.assetExcludes,
@@ -44,8 +40,7 @@ namespace Katas.UniMod.Editor
         public static void ResolveIncludedGuids<T>(bool includeAssetsFolder,
             IEnumerable<DefaultAsset> folderIncludes, IEnumerable<DefaultAsset> folderExcludes,
             IEnumerable<T> assetIncludes, IEnumerable<T> assetExcludes,
-            ISet<string> guids) where T : Object
-        {
+            ISet<string> guids) where T : Object {
             var filter = $"t:{typeof(T).Name}";
             
             // find all guids in included and excluded folders
@@ -73,17 +68,13 @@ namespace Katas.UniMod.Editor
         /// Helper method similar to AssetDatabase.FindAssets but with a collection of DefaultAsset objects that should be valid folders.
         /// If the given collection is empty, an empty array will be returned (contrary to AssetDatabase.FindAssets which would search on all folders)
         /// </summary>
-        public static string[] FindAssets(string filter, bool includeAssetsFolder, IEnumerable<DefaultAsset> folderAssets)
-        {
+        public static string[] FindAssets(string filter, bool includeAssetsFolder, IEnumerable<DefaultAsset> folderAssets) {
             using var _ = ListPool<string>.Get(out var validFolders);
 
-            if (folderAssets is not null)
-            {
-                foreach (DefaultAsset folderAsset in folderAssets)
-                {
+            if (folderAssets is not null) {
+                foreach (DefaultAsset folderAsset in folderAssets) {
                     string folder = AssetDatabase.GetAssetPath(folderAsset);
-                    if (string.IsNullOrEmpty(folder) || !AssetDatabase.IsValidFolder(folder))
-                        continue;
+                    if (string.IsNullOrEmpty(folder) || !AssetDatabase.IsValidFolder(folder)) continue;
                     
                     validFolders.Add(folder);
                 }

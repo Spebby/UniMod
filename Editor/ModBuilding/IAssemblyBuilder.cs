@@ -3,10 +3,8 @@ using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.Compilation;
 
-namespace Katas.UniMod.Editor
-{
-    public interface IAssemblyBuilder
-    {
+namespace UniMod.Editor {
+    public interface IAssemblyBuilder {
         bool SupportsBuildTarget(BuildTarget buildTarget);
         
         /// <summary>

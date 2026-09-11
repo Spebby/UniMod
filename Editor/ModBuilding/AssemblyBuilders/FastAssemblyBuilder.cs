@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor.Compilation;
 using Cysharp.Threading.Tasks;
+using UniMod.Utilities;
 using UnityEditor;
 
-namespace Katas.UniMod.Editor
-{
+
+namespace UniMod.Editor {
     /// <summary>
     /// Uses the editor precompiled assemblies under the Library/ScriptAssemblies folder. It is quicker since no build is required.
     /// <br/><br/>
@@ -15,27 +16,24 @@ namespace Katas.UniMod.Editor
     /// <br/><br/>
     /// Use this builder for fast iteration.
     /// </summary>
-    public sealed class FastAssemblyBuilder : IAssemblyBuilder
-    {
+    public sealed class FastAssemblyBuilder : IAssemblyBuilder {
         public static readonly FastAssemblyBuilder Instance = new();
         
-        private const string LibraryScriptAssembliesPath = "Library/ScriptAssemblies";
+        const string LibraryScriptAssembliesPath = "Library/ScriptAssemblies";
         
-        private FastAssemblyBuilder() { }
+        FastAssemblyBuilder() { }
         
         public bool SupportsBuildTarget(BuildTarget buildTarget)
             => true;
         
-        public UniTask BuildAssembliesAsync(IEnumerable<string> assemblyNames, CodeOptimization buildMode, BuildTarget buildTarget, string outputFolder)
-        {
+        public UniTask BuildAssembliesAsync(IEnumerable<string> assemblyNames, CodeOptimization buildMode, BuildTarget buildTarget, string outputFolder) {
             bool isDebugBuild = buildMode is CodeOptimization.Debug;
             return UniTaskUtility.WhenAll(
                 assemblyNames.Select(name => CopyAssembly(name, outputFolder, isDebugBuild))
             );
         }
 
-        private static UniTask CopyAssembly(string assemblyName, string outputFolder, bool isDebugBuild)
-        {
+        static UniTask CopyAssembly(string assemblyName, string outputFolder, bool isDebugBuild) {
             string path = Path.Combine(LibraryScriptAssembliesPath, assemblyName + ".dll");
             return UniModEditorUtility.CopyManagedAssemblyAsync(path, outputFolder, isDebugBuild);
         }

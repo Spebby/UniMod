@@ -2,10 +2,9 @@ using UnityEngine;
 using UnityEditor.Compilation;
 using Cysharp.Threading.Tasks;
 
-namespace Katas.UniMod.Editor
-{
-    public abstract class ModBuilder : ScriptableObject
-    {
+
+namespace UniMod.Editor {
+    public abstract class ModBuilder : ScriptableObject {
         /// <summary>
         /// Builds the mod with the specified parameters.
         /// </summary>

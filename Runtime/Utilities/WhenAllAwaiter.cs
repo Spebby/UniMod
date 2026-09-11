@@ -2,36 +2,34 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.Utilities {
     /// <summary>
     /// Utility class to await multiple task with proper exception throwing.
     /// </summary>
-    internal sealed class WhenAllAwaiter
-    {
-        public bool IsAwaiting { get; private set; }
-        
-        private readonly List<UniTask> _wrappedTasks = new();
-        private readonly List<Exception> _exceptions = new();
-        
-        public async UniTask WaitAndThrowAll(IEnumerable<UniTask> tasks)
-        {
+    sealed class WhenAllAwaiter {
+        public bool IsAwaiting { get; set; }
+
+        readonly List<UniTask> _wrappedTasks = new();
+        readonly List<Exception> _exceptions = new();
+
+        public async UniTask WaitAndThrowAll(IEnumerable<UniTask> tasks) {
             if (IsAwaiting)
                 throw new Exception("Already awaiting a previous call...");
-            
+
             IsAwaiting = true;
-            
+
             // create the wrapped tasks that will catch the exceptions
             IEnumerator<UniTask> enumerator = tasks.GetEnumerator();
             while (enumerator.MoveNext())
                 _wrappedTasks.Add(GetWrappedTask(enumerator.Current));
             enumerator.Dispose();
-                
+
             await UniTask.WhenAll(_wrappedTasks);
             _wrappedTasks.Clear();
 
-            switch (_exceptions.Count)
-            {
+            // TODO: consider a lock
+            switch (_exceptions.Count) {
                 case 0:
                     IsAwaiting = false;
                     return;
@@ -42,50 +40,44 @@ namespace Katas.UniMod
                     throw exception;
             }
 
-            var aggregateException = new AggregateException(_exceptions);
+            AggregateException aggregateException = new(_exceptions);
             _exceptions.Clear();
             IsAwaiting = false;
             throw aggregateException;
         }
 
-        private async UniTask GetWrappedTask (UniTask task)
-        {
-            try
-            {
+        async UniTask GetWrappedTask(UniTask task) {
+            try {
                 await task;
-            }
-            catch (Exception exception)
-            {
-                lock(_exceptions)
+            } catch (Exception exception) {
+                lock (_exceptions) {
                     _exceptions.Add(exception);
+                }
             }
         }
     }
-    
-    internal sealed class WhenAllAwaiter<T>
-    {
-        public bool IsAwaiting { get; private set; }
 
-        private readonly List<UniTask<T>> _wrappedTasks = new();
-        private readonly List<Exception> _exceptions = new();
-        
-        public async UniTask<T[]> WhenAll(IEnumerable<UniTask<T>> tasks)
-        {
+    sealed class WhenAllAwaiter<T> {
+        public bool IsAwaiting { get; set; }
+
+        readonly List<UniTask<T>> _wrappedTasks = new();
+        readonly List<Exception> _exceptions = new();
+
+        public async UniTask<T[]> WhenAll(IEnumerable<UniTask<T>> tasks) {
             if (IsAwaiting)
                 throw new Exception("Already awaiting a previous call...");
-            
+
             IsAwaiting = true;
-            
+
             IEnumerator<UniTask<T>> enumerator = tasks.GetEnumerator();
             while (enumerator.MoveNext())
                 _wrappedTasks.Add(GetWrappedTask(enumerator.Current));
             enumerator.Dispose();
-            
+
             T[] result = await UniTask.WhenAll(_wrappedTasks);
             _wrappedTasks.Clear();
 
-            switch (_exceptions.Count)
-            {
+            switch (_exceptions.Count) {
                 case 0:
                     IsAwaiting = false;
                     return result;
@@ -96,29 +88,27 @@ namespace Katas.UniMod
                     throw exception;
             }
 
-            var aggregateException = new AggregateException(_exceptions);
+            AggregateException aggregateException = new(_exceptions);
             _exceptions.Clear();
             IsAwaiting = false;
             throw aggregateException;
         }
-        
-        public async UniTask<(T[] result, Exception exception)> WhenAllWithResult(IEnumerable<UniTask<T>> tasks)
-        {
+
+        public async UniTask<(T[] result, Exception exception)> WhenAllWithResult(IEnumerable<UniTask<T>> tasks) {
             if (IsAwaiting)
                 throw new Exception("Already awaiting a previous call...");
-            
+
             IsAwaiting = true;
-            
+
             IEnumerator<UniTask<T>> enumerator = tasks.GetEnumerator();
             while (enumerator.MoveNext())
                 _wrappedTasks.Add(GetWrappedTask(enumerator.Current));
             enumerator.Dispose();
-            
+
             T[] result = await UniTask.WhenAll(_wrappedTasks);
             _wrappedTasks.Clear();
 
-            switch (_exceptions.Count)
-            {
+            switch (_exceptions.Count) {
                 case 0:
                     IsAwaiting = false;
                     return (result, null);
@@ -129,20 +119,16 @@ namespace Katas.UniMod
                     return (result, exception);
             }
 
-            var aggregateException = new AggregateException(_exceptions);
+            AggregateException aggregateException = new(_exceptions);
             _exceptions.Clear();
             IsAwaiting = false;
             return (result, aggregateException);
         }
 
-        private async UniTask<T> GetWrappedTask (UniTask<T> task)
-        {
-            try
-            {
+        async UniTask<T> GetWrappedTask(UniTask<T> task) {
+            try {
                 return await task;
-            }
-            catch (Exception exception)
-            {
+            } catch (Exception exception) {
                 _exceptions.Add(exception);
                 return default;
             }

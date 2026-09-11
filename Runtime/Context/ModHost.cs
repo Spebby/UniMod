@@ -1,14 +1,15 @@
+using UniMod.Data;
+using UniMod.Utilities;
 using UnityEngine;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.Context {
     /// <summary>
     /// Default mod host implementation which can be extended for overriding the host versioning rules. It also provides some
     /// extra configuration parameters like the ability to enable disable support for standalone mods or mods created for other hosts and
     /// the ability to disable support for mods containing assemblies.
     /// </summary>
-    public class ModHost : IModHost
-    {
+    public class ModHost : IModHost {
         public string Id { get; }
         public string Version { get; }
         
@@ -16,34 +17,28 @@ namespace Katas.UniMod
         public bool SupportModsContainingAssemblies = true;
         public bool SupportModsCreatedForOtherHosts = false;
         
-        public ModHost(string hostId, string hostVersion)
-        {
+        public ModHost(string hostId, string hostVersion) {
             Id = hostId;
             Version = hostVersion;
         }
         
-        public virtual ModIssues GetModIssues(IMod mod)
-        {
+        public virtual ModIssues GetModIssues(IMod mod) {
             ModIssues issues = 0;
-            
             bool isHostSupported;
             bool isHostVersionSupported;
 
             // if the mod was created for this host, then check if the version is supported
-            if (mod.Target.HostId == Id)
-            {
+            if (mod.Target.HostId == Id) {
                 isHostSupported = true;
                 isHostVersionSupported = !IsHostVersionSupported(mod.Target.HostVersion);
             }
             // if the mod is standalone (does not target a specific host), then set it supported depending on the config
-            else if (string.IsNullOrEmpty(mod.Target.HostId))
-            {
+            else if (string.IsNullOrEmpty(mod.Target.HostId)) {
                 isHostSupported = SupportStandaloneMods;
                 isHostVersionSupported = true; // skip host version checking
             }
             // if the mod was created for another host, then set it supported depending on the config
-            else
-            {
+            else {
                 isHostSupported = SupportModsCreatedForOtherHosts;
                 isHostVersionSupported = true; // skip host version checking
             }
@@ -51,7 +46,7 @@ namespace Katas.UniMod
             // register the issues
             if (Application.unityVersion != mod.Target.UnityVersion)
                 issues |= ModIssues.UnsupportedUnityVersion;
-            if (!UniModUtility.IsSemanticVersionSupportedByCurrent(mod.Target.UniModVersion, UniModRuntime.Version))
+            if (!UniModUtility.IsSemanticVersionSupportedByCurrent(mod.Target.UniModVersion, UniModRuntime.VERSION))
                 issues |= ModIssues.UnsupportedUniModVersion;
             if (!UniModUtility.IsPlatformCompatible(mod.Target.Platform))
                 issues |= ModIssues.UnsupportedPlatform;
@@ -65,18 +60,16 @@ namespace Katas.UniMod
             return issues;
         }
         
-        public virtual bool IsModSupported(IMod mod, out ModIssues issues)
-        {
+        public virtual bool IsModSupported(IMod mod, out ModIssues issues) {
             issues = GetModIssues(mod);
             return issues == 0;
         }
         
         /// <summary>
-        /// Whether or not the given host version is supported by the this host version. Override this if you want to implement
+        /// Whether the given host version is supported by the this host version. Override this if you want to implement
         /// your own versioning rules for your project. Uses semantic versioning rules by default.
         /// </summary>
-        protected virtual bool IsHostVersionSupported(string version)
-        {
+        protected virtual bool IsHostVersionSupported(string version) {
             return UniModUtility.IsSemanticVersionSupportedByCurrent(version, Version);
         }
     }

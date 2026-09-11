@@ -4,14 +4,13 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace Katas.UniMod.Editor
-{
-    public static class ModConfigUtility
-    {
-        private const string BuildModeKey = "buildmode";
-        private const string OutputPathKey = "outputpath";
-        private const string DevBuildModeKey = "dev_buildmode";
-        private const string DevOutputFolderKey = "dev_outputfolder";
+
+namespace UniMod.Editor {
+    public static class ModConfigUtility {
+        const string BuildModeKey = "buildmode";
+        const string OutputPathKey = "outputpath";
+        const string DevBuildModeKey = "dev_buildmode";
+        const string DevOutputFolderKey = "dev_outputfolder";
         
         /// <summary>
         /// Builds the mod.
@@ -43,16 +42,14 @@ namespace Katas.UniMod.Editor
             CodeOptimization? buildMode = null, string outputFolder = null, bool defaultToCachedParameters = false)
             => BuildWithGuiInternalAsync(config, buildMode, outputFolder, defaultToCachedParameters, true, skipAssemblies, skipAssets);
         
-        public static string GetDefaultFileOutputName(this ModConfig config, CodeOptimization buildMode)
-        {
+        public static string GetDefaultFileOutputName(this ModConfig config, CodeOptimization buildMode) {
             if (UniModEditorUtility.TryGetRuntimePlatformFromBuildTarget(EditorUserBuildSettings.activeBuildTarget, out RuntimePlatform runtimePlatform))
-                return $"{config.modId}-{config.modVersion}-{runtimePlatform}-{buildMode}{UniModRuntime.ModFileExtension}";
+                return $"{config.modId}-{config.modVersion}-{runtimePlatform}-{buildMode}{UniModRuntime.MOD_FILE_EXTENSION}";
             else
-                return $"{config.modId}-{config.modVersion}-{buildMode}{UniModRuntime.ModFileExtension}";
+                return $"{config.modId}-{config.modVersion}-{buildMode}{UniModRuntime.MOD_FILE_EXTENSION}";
         }
         
-        public static CodeOptimization? GetCachedBuildMode(this ModConfig config, bool developmentBuild = false)
-        {
+        public static CodeOptimization? GetCachedBuildMode(this ModConfig config, bool developmentBuild = false) {
             CheckConfig(config);
             string uniqueKey = UniModEditorUtility.GetUniqueKeyForAsset(config, developmentBuild ? DevBuildModeKey : BuildModeKey);
             string buildTargetValue = PlayerPrefs.GetString(uniqueKey, null);
@@ -63,43 +60,35 @@ namespace Katas.UniMod.Editor
             return value;
         }
 
-        public static void SetCachedBuildMode(this ModConfig config, CodeOptimization? buildMode, bool developmentBuild = false)
-        {
+        public static void SetCachedBuildMode(this ModConfig config, CodeOptimization? buildMode, bool developmentBuild = false) {
             CheckConfig(config);
             string uniqueKey = UniModEditorUtility.GetUniqueKeyForAsset(config, developmentBuild ? DevBuildModeKey : BuildModeKey);
             PlayerPrefs.SetString(uniqueKey, buildMode?.ToString());
         }
 
-        public static string GetCachedBuildOutputPath(this ModConfig config, bool developmentBuild = false)
-        {
+        public static string GetCachedBuildOutputPath(this ModConfig config, bool developmentBuild = false) {
             CheckConfig(config);
             string uniqueKey = UniModEditorUtility.GetUniqueKeyForAsset(config, developmentBuild ? DevOutputFolderKey : OutputPathKey);
             return PlayerPrefs.GetString(uniqueKey, null);
         }
 
-        public static void SetCachedBuildOutputPath(this ModConfig config, string outputPath, bool developmentBuild = false)
-        {
+        public static void SetCachedBuildOutputPath(this ModConfig config, string outputPath, bool developmentBuild = false) {
             CheckConfig(config);
             string uniqueKey = UniModEditorUtility.GetUniqueKeyForAsset(config, developmentBuild ? DevOutputFolderKey : OutputPathKey);
             PlayerPrefs.SetString(uniqueKey, outputPath);
         }
         
-        private static async UniTask BuildInternalAsync (this ModConfig config, CodeOptimization buildMode, string outputPath,
-            bool developmentBuild, bool skipAssemblies, bool skipAssets)
-        {
+        static async UniTask BuildInternalAsync (this ModConfig config, CodeOptimization buildMode, string outputPath,
+            bool developmentBuild, bool skipAssemblies, bool skipAssets) {
             CheckConfig(config);
             if (config.builder is null)
                 throw new Exception("No mod builder is defined in this config");
             
-            try
-            {
-                if (developmentBuild)
-                {
+            try {
+                if (developmentBuild) {
                     await config.builder.BuildForDevelopmentAsync(config, buildMode, outputPath, skipAssemblies, skipAssets);
                     Debug.Log($"Mod built successfully!\nDevelopment build output: {outputPath}");
-                }
-                else
-                {
+                } else {
                     await config.builder.BuildAsync(config, buildMode, outputPath);
                     Debug.Log($"Mod built successfully!\nOutput path: {outputPath}");
                 }
@@ -107,18 +96,14 @@ namespace Katas.UniMod.Editor
                 // cache build parameters for next Gui builds
                 SetCachedBuildOutputPath(config, outputPath, developmentBuild);
                 SetCachedBuildMode(config, buildMode, developmentBuild);
-            }
-            catch (Exception exception)
-            {
+            } catch (Exception exception) {
                 throw new Exception($"Mod build failed:\nID: {config.modId}\nVersion: {config.modVersion}\n\n{exception}");
             }
         }
 
-        private static async UniTask BuildWithGuiInternalAsync (this ModConfig config, CodeOptimization? buildMode, string outputPath,
-            bool defaultToCachedParameters, bool developmentBuild, bool skipAssemblies, bool skipAssets)
-        {
-            if (defaultToCachedParameters)
-            {
+        static async UniTask BuildWithGuiInternalAsync (this ModConfig config, CodeOptimization? buildMode, string outputPath,
+            bool defaultToCachedParameters, bool developmentBuild, bool skipAssemblies, bool skipAssets) {
+            if (defaultToCachedParameters) {
                 buildMode ??= GetCachedBuildMode(config, developmentBuild);
                 outputPath ??= GetCachedBuildOutputPath(config, developmentBuild);
             }
@@ -136,36 +121,31 @@ namespace Katas.UniMod.Editor
             await BuildInternalAsync(config, buildMode.Value, outputPath, developmentBuild, skipAssemblies, skipAssets);
         }
 
-        private static void CheckConfig(ModConfig config)
-        {
+        static void CheckConfig(ModConfig config) {
             if (!config)
                 throw new Exception("The mod config is null or has been destroyed");
         }
         
-        private static CodeOptimization DisplayBuildModeDialog()
-        {
+        static CodeOptimization DisplayBuildModeDialog() {
             int option = EditorUtility.DisplayDialogComplex("Build mode", "Select a build mode", "Release", "Cancel", "Debug");
 
-            return option switch
-            {
+            return option switch {
                 0 => CodeOptimization.Release,
                 2 => CodeOptimization.Debug,
                 _ => CodeOptimization.None
             };
         }
         
-        private static string DisplayModBuildOutputPathDialog(string defaultOutputPath, CodeOptimization buildMode, bool developmentBuild)
-        {
+        static string DisplayModBuildOutputPathDialog(string defaultOutputPath, CodeOptimization buildMode, bool developmentBuild) {
             if (buildMode == CodeOptimization.None)
                 return null;
 
-            if (developmentBuild)
-            {
+            if (developmentBuild) {
                 string outputFolder = EditorUtility.SaveFolderPanel("Build mod for development...", null, null);
                 return outputFolder;
             }
             
-            string outputPath = EditorUtility.SaveFilePanel("Build mod...", null, defaultOutputPath, UniModRuntime.ModFileExtensionNoDot);
+            string outputPath = EditorUtility.SaveFilePanel("Build mod...", null, defaultOutputPath, UniModRuntime.MOD_FILE_EXTENSION_NO_DOT);
             return outputPath;
         }
     }

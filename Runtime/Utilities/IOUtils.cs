@@ -1,84 +1,72 @@
 using System;
 using System.IO;
 
-namespace Katas.UniMod
-{
-    internal static class IOUtils
-    {
+
+namespace UniMod.Utilities {
+    static class IOUtils {
         /// <summary>
         /// Returns all file paths of files with the given extension (without dot) under the given root folder. If the recurse parameter
         /// is set to true, it will include all subfolders.
         /// </summary>
-        public static string[] FindAllFilesWithExtension (string rootFolder, string extension, bool recurse = false)
+        public static string[] FindAllFilesWithExtension(string rootFolder, string extension, bool recurse = false)
             => Directory.GetFiles(rootFolder, $"*.{extension}", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
         /// <summary>
         /// Recursive method to delete the specified directory path and all its contents.
         /// </summary>
-        public static void DeleteDirectory (string path, bool deleteFolderMetaFile = false)
-        {
+        public static void DeleteDirectory(string path, bool deleteFolderMetaFile = false) {
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
 
-            if (deleteFolderMetaFile)
-            {
-                string metaFile = path + ".meta";
+            if (deleteFolderMetaFile) {
+                string metaFile = $"{path}.meta";
 
-                if (File.Exists(metaFile))
-                    File.Delete(metaFile);
+                if (File.Exists(metaFile)) File.Delete(metaFile);
             }
 
-            string[] files = Directory.GetFiles(path);
+            string[] files       = Directory.GetFiles(path);
             string[] directories = Directory.GetDirectories(path);
 
-            foreach (string file in files)
-            {
+            foreach (string file in files) {
                 File.SetAttributes(file, FileAttributes.Normal);
                 File.Delete(file);
             }
 
-            foreach (string directory in directories)
-                DeleteDirectory(directory);
-
+            foreach (string directory in directories) DeleteDirectory(directory);
             Directory.Delete(path, false);
         }
-        
+
         /// <summary>
         /// Recursive method to copy the specified directory path and all its contents.
         /// </summary>
-        public static void CopyDirectory (string src, string dest, bool overwriteExistingFiles = false, bool ignoreMetaFiles = false)
-        {
-            if (!Directory.Exists(src))
-                throw new DirectoryNotFoundException($"Could not find the specified directory: \"{src}\"");
+        public static void CopyDirectory(string src, string dest, bool overwriteExistingFiles = false, bool ignoreMetaFiles = false) {
+            if (!Directory.Exists(src)) throw new DirectoryNotFoundException($"Could not find the specified directory: \"{src}\"");
+            if (!Directory.Exists(dest)) Directory.CreateDirectory(dest);
 
-            if (!Directory.Exists(dest))
-                Directory.CreateDirectory(dest);
-
-            string[] files = Directory.GetFiles(src);
+            string[] files       = Directory.GetFiles(src);
             string[] directories = Directory.GetDirectories(src);
-            
-            foreach (string file in files)
-                if (!ignoreMetaFiles || Path.GetExtension(file) != ".meta")
-                    File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), overwriteExistingFiles);
 
-            foreach (string directory in directories)
+            foreach (string file in files) {
+                if (ignoreMetaFiles && Path.GetExtension(file) == ".meta") continue;
+                File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), overwriteExistingFiles);
+            }
+
+            foreach (string directory in directories) {
                 CopyDirectory(directory, Path.Combine(dest, Path.GetFileName(directory)), overwriteExistingFiles, ignoreMetaFiles);
+            }
         }
 
         /// <summary>
         /// Gets a unique folder name. If a path (must be a folder) is given, it will make sure that the unique name given is not in conflict with any subfolder.
         /// </summary>
-        public static string GetUniqueFolderName (string path = null)
-        {
+        public static string GetUniqueFolderName(string path = null) {
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                 return Guid.NewGuid().ToString();
-            
+
             string guid;
 
-            do
-            {
+            do {
                 guid = Guid.NewGuid().ToString();
-            }
-            while (Directory.Exists(Path.Combine(path, guid)));
+            } while (Directory.Exists(Path.Combine(path, guid)));
 
             return guid;
         }
@@ -86,14 +74,12 @@ namespace Katas.UniMod
         /// <summary>
         /// Gets a unique folder path inside the given root.
         /// </summary>
-        public static string GetUniqueFolderPath (string root)
-            => Path.Combine(root, GetUniqueFolderName(root));
+        public static string GetUniqueFolderPath(string root) => Path.Combine(root, GetUniqueFolderName(root));
 
         /// <summary>
         /// Creates a temporary folder in a local temp path. It returns the path.
         /// </summary>
-        public static string CreateTmpFolder ()
-        {
+        public static string CreateTmpFolder() {
 #if UNITY_EDITOR
             string path = GetUniqueFolderPath("Temp");
 #else
@@ -113,18 +99,14 @@ namespace Katas.UniMod
         /// EnsureFileExtension("C:/Test/file.dll", "exe", true) // returns "C:/Test/file.exe"
         /// EnsureFileExtension("C:/Test/file.dll.bytes", "exe", true) // returns "C:/Test/file.dll.exe"
         /// </summary>
-        public static string EnsureFileExtension (string path, string extension, bool changeExtension = false)
-        {
-            string dotExtension = "." + extension;
+        public static string EnsureFileExtension(string path, string extension, bool changeExtension = false) {
+            string dotExtension = $".{extension}";
 
             if (path.EndsWith(dotExtension))
                 return path;
-            else if (path.EndsWith("."))
-                return path + extension;
-            else if (changeExtension)
-                return Path.ChangeExtension(path, dotExtension);
-            else
-                return path + dotExtension;
+            if (path.EndsWith("."))
+                return $"{path}{extension}";
+            return changeExtension ? Path.ChangeExtension(path, dotExtension) : $"{path}{dotExtension}";
         }
     }
 }

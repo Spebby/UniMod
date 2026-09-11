@@ -4,13 +4,12 @@ using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
-namespace Katas.UniMod.Editor
-{
+
+namespace UniMod.Editor {
     /// <summary>
     /// Extend this class to create custom assembly builders that you can set to <see cref="LocalModBuilder"/> assets.
     /// </summary>
-    public abstract class CustomAssemblyBuilder : ScriptableObject, IAssemblyBuilder
-    {
+    public abstract class CustomAssemblyBuilder : ScriptableObject, IAssemblyBuilder {
         public abstract bool SupportsBuildTarget(BuildTarget buildTarget);
         public abstract UniTask BuildAssembliesAsync(IEnumerable<string> assemblyNames, CodeOptimization buildMode, BuildTarget buildTarget, string outputFolder);
     }

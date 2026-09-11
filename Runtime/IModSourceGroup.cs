@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod {
     /// <summary>
     /// Handles a group of mod sources.
     /// </summary>
-    public interface IModSourceGroup
-    {
+    public interface IModSourceGroup {
         IReadOnlyList<IModSource> Sources { get; }
 
         bool AddSource(IModSource source);

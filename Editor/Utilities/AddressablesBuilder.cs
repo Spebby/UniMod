@@ -1,41 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using UniMod.Utilities;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 
-namespace Katas.UniMod.Editor
-{
+
+namespace UniMod.Editor {
     /// <summary>
     /// Helper class designed to create a distributable Addressables build with specific build/load paths that are used for the catalog and all
     /// the groups added to the builder. This class will not use any default Addressables settings from the project but will rather create clean
     /// settings without for the build. Any already existing groups added to the builder will be copied, so they will not be modified even if you
     /// use the returned IGroupBuilder to add new asset entries.
     /// </summary>
-    public sealed partial class AddressablesBuilder : IDisposable
-    {
-        private const string TmpAaDataFolder = "Assets/__tmp_addressable_assets_data";
-        private const string BundlesRelativePath = "Bundles";
-        private const string CatalogSuffix = "assets";
-        private const string CatalogLoadPathName = "Catalog.LoadPath";
-        private const string CatalogBuildPathName = "Catalog.BuildPath";
-        private const string BundlesLoadPathName = "Bundles.LoadPath";
-        private const string BundlesBuildPathName = "Bundles.BuildPath";
+    public sealed partial class AddressablesBuilder : IDisposable {
+        const string TmpAaDataFolder = "Assets/__tmp_addressable_assets_data";
+        const string BundlesRelativePath = "Bundles";
+        const string CatalogSuffix = "assets";
+        const string CatalogLoadPathName = "Catalog.LoadPath";
+        const string CatalogBuildPathName = "Catalog.BuildPath";
+        const string BundlesLoadPathName = "Bundles.LoadPath";
+        const string BundlesBuildPathName = "Bundles.BuildPath";
         
-        private readonly AddressableAssetSettings _settings;
-        private readonly HashSet<GroupBuilder> _groupBuilders = new();
-        private readonly bool _createdDefaultConfigFolder;
+        readonly AddressableAssetSettings _settings;
+        readonly HashSet<GroupBuilder> _groupBuilders = new();
+        readonly bool _createdDefaultConfigFolder;
         
-        private AddressableAssetSettings _previousDefaultSettings;
-        private bool _isDisposed = true;
+        AddressableAssetSettings _previousDefaultSettings;
+        bool _isDisposed = true;
 
-        public AddressablesBuilder()
-        {
-            if (AssetDatabase.IsValidFolder(TmpAaDataFolder))
-            {
+        public AddressablesBuilder() {
+            if (AssetDatabase.IsValidFolder(TmpAaDataFolder)) {
                 IOUtils.DeleteDirectory(TmpAaDataFolder);
                 AssetDatabase.Refresh();
             }
@@ -52,8 +50,7 @@ namespace Katas.UniMod.Editor
             _settings.DefaultGroup = defaultGroup;
             
             // manually create a default Addressable assets config folder if it doesn't exist so setting AddressableAssetSettingsDefaultObject.Settings won't complain....
-            if (!AssetDatabase.IsValidFolder(AddressableAssetSettingsDefaultObject.kDefaultConfigFolder))
-            {
+            if (!AssetDatabase.IsValidFolder(AddressableAssetSettingsDefaultObject.kDefaultConfigFolder)) {
                 Directory.CreateDirectory(AddressableAssetSettingsDefaultObject.kDefaultConfigFolder);
                 _createdDefaultConfigFolder = true;
                 AssetDatabase.Refresh();
@@ -70,8 +67,7 @@ namespace Katas.UniMod.Editor
         /// Creates a group from the default packed assets template that will be included in the build. Use the returned IGroupBuilder instance
         /// to add any assets to the group.
         /// </summary>
-        public IGroupBuilder CreateGroup(string groupName)
-        {
+        public IGroupBuilder CreateGroup(string groupName) {
             ThrowIfDisposed();
             var groupBuilder = new GroupBuilder(_settings, groupName);
             _groupBuilders.Add(groupBuilder);
@@ -85,8 +81,7 @@ namespace Katas.UniMod.Editor
         public IGroupBuilder CreateGroup(
             string groupName,
             List<AddressableAssetGroupSchema> schemasToCopy,
-            params Type[] types)
-        {
+            params Type[] types) {
             ThrowIfDisposed();
             var groupBuilder = new GroupBuilder(_settings, groupName, schemasToCopy, types);
             _groupBuilders.Add(groupBuilder);
@@ -97,8 +92,7 @@ namespace Katas.UniMod.Editor
         /// Includes the given group in the build. You can use the returned IGroupBuilder to add new asset entries that will be removed
         /// after the build (if you add assets directly to the group, they will stay after).
         /// </summary>
-        public IGroupBuilder AddGroup(AddressableAssetGroup group)
-        {
+        public IGroupBuilder AddGroup(AddressableAssetGroup group) {
             ThrowIfDisposed();
 
             if (!group)
@@ -114,24 +108,20 @@ namespace Katas.UniMod.Editor
         /// created for each given group. You can then use each IGroupBuilder to add new asset entries that will be removed
         /// after the build (if you add assets directly to the group, they will stay after).
         /// </summary>
-        public void AddGroups(IEnumerable<AddressableAssetGroup> groups, ICollection<IGroupBuilder> builders = null)
-        {
+        public void AddGroups(IEnumerable<AddressableAssetGroup> groups, ICollection<IGroupBuilder> builders = null) {
             ThrowIfDisposed();
             
             if (groups is null)
                 return;
             
-            foreach (AddressableAssetGroup group in groups)
-            {
+            foreach (AddressableAssetGroup group in groups) {
                 var groupBuilder = AddGroup(group);
                 builders?.Add(groupBuilder);
             }
         }
         
-        public void Dispose()
-        {
-            if (_isDisposed)
-                return;
+        public void Dispose() {
+            if (_isDisposed) return;
             
             // dispose groups
             foreach(GroupBuilder groupBuilder in _groupBuilders)
@@ -150,8 +140,7 @@ namespace Katas.UniMod.Editor
             
             AssetDatabase.Refresh();
             
-            if (_previousDefaultSettings)
-            {
+            if (_previousDefaultSettings) {
                 // for some mysterious reason the newly created groups are being added to the previous default settings, just Addressables...
                 UniModEditorUtility.RemoveAddressableSettingsGroupMissingReferences(_previousDefaultSettings);
                 
@@ -168,8 +157,7 @@ namespace Katas.UniMod.Editor
         /// will be automatically removed after the build. You can set a beforeBuildingCallback to perform any extra configuration
         /// in the temporary AddressableAssetSettings instance before the build. It disposed the builder automatically after the build
         /// </summary>
-        public AddressablesPlayerBuildResult Build(string buildPath, string loadPath, Action<AddressableAssetSettings> beforeBuildingCallback = null)
-        {
+        public AddressablesPlayerBuildResult Build(string buildPath, string loadPath, Action<AddressableAssetSettings> beforeBuildingCallback = null) {
             ThrowIfDisposed();
             
             if (string.IsNullOrEmpty(buildPath))
@@ -177,20 +165,16 @@ namespace Katas.UniMod.Editor
             if (string.IsNullOrEmpty(loadPath))
                 throw new Exception("The given load path is null or empty");
 
-            try
-            {
+            try {
                 // invoke before the setup so critical settings cannot be overwritten
                 beforeBuildingCallback?.Invoke(_settings);
                 return SetupAndBuild(buildPath, loadPath);
-            }
-            finally
-            {
+            } finally {
                 Dispose();
             }
         }
 
-        private AddressablesPlayerBuildResult SetupAndBuild(string buildPath, string loadPath)
-        {
+        AddressablesPlayerBuildResult SetupAndBuild(string buildPath, string loadPath) {
             // get the custom build/load paths for bundles
             string bundlesBuildPath = Path.Combine(buildPath, BundlesRelativePath);
             string bundlesLoadPath = Path.Combine(loadPath, BundlesRelativePath);
@@ -233,8 +217,7 @@ namespace Katas.UniMod.Editor
             return result;
         }
         
-        private void SetupBundledSchema(BundledAssetGroupSchema schema, string buildPathId, string loadPathId)
-        {
+        void SetupBundledSchema(BundledAssetGroupSchema schema, string buildPathId, string loadPathId) {
             schema.IncludeInBuild = true;
             schema.IncludeGUIDInCatalog = true; // make sure this is true, otherwise embedded mods will not work as expected
             schema.BundleNaming = BundledAssetGroupSchema.BundleNamingStyle.NoHash;
@@ -242,8 +225,7 @@ namespace Katas.UniMod.Editor
             schema.LoadPath.SetVariableById(_settings, loadPathId);
         }
         
-        private void ThrowIfDisposed()
-        {
+        void ThrowIfDisposed() {
             if (_isDisposed)
                 throw new Exception("The builder has been disposed but you are trying to access it");
         }

@@ -1,10 +1,9 @@
 using System;
 
-namespace Katas.UniMod
-{
+
+namespace UniMod.Data {
     [Serializable]
-    public struct ModReference
-    {
+    public struct ModReference {
         public string id;
         public string version;
     }
